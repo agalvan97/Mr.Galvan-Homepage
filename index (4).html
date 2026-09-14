@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mr. Galvan Classpage</title>
+<style>
+    :root {
+        --blue: #0a2f6b;
+        --blue-dark: #061c42;
+        --gold: #ffc72c;
+        --gold-dark: #c9a227;
+        --white: #fdfdfb;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+        background: var(--white);
+        color: #16213a;
+    }
+
+    /* ── Top third: school band with running horse ── */
+    .school-band {
+        background: linear-gradient(180deg, var(--blue), var(--blue-dark));
+        min-height: 32vh;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        padding-top: 2.4rem;
+        border-bottom: 6px solid var(--gold);
+    }
+    .school-band h2 {
+        color: var(--gold);
+        font-size: clamp(1.3rem, 4.2vw, 2.5rem);
+        letter-spacing: 3px;
+        text-align: center;
+        text-shadow: 2px 2px 0 rgba(0,0,0,0.35);
+        padding: 0 1rem;
+    }
+    .school-band .sub {
+        color: #c7d2ea;
+        font-size: 0.85rem;
+        letter-spacing: 2px;
+        margin-top: 0.6rem;
+        text-transform: uppercase;
+    }
+    .track {
+        position: absolute;
+        bottom: 22%;
+        left: 0;
+        width: 100%;
+        height: 60px;
+        border-top: 2px dashed rgba(255,255,255,0.22);
+    }
+    .horse {
+        position: absolute;
+        bottom: 0;
+        left: -120px;
+        width: 96px;
+        height: 60px;
+        background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAAAUCAYAAAA9djs/AAAAw0lEQVR4nOWWPQ6AIAyFi9GjGBZmE6/rZQjObh7Foc7+00ALsW9z8SOvrz8AgkLvEL1DSeYXvyn1mFpkuAFPFTfjws6O4WdPQJgshskWizmV33I9pGSvU/jqZ8AlAegdcvRn7D+l+bcJqHFdcenWlRT4vG4AADD03RFEqKokP/sQPIOlReW/ViVHDFP6WYL/ugWkjpWS/M81+HcT2O+A2jdKlAFmXMy5EtTvFHHy1V+C6g0g3QHUWHMPsBxtpz4B6g3YAY1wb4oUZL65AAAAAElFTkSuQmCC);
+        background-repeat: no-repeat;
+        background-size: 192px 60px;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        animation: run-cycle 0.4s steps(2) infinite, run-across 7s linear infinite;
+    }
+    @keyframes run-cycle {
+        from { background-position: 0 0; }
+        to   { background-position: -96px 0; }
+    }
+    @keyframes run-across {
+        from { left: -120px; }
+        to   { left: 100%; }
+    }
+
+    /* ── Hero title ── */
+    .hero {
+        text-align: center;
+        padding: 2.6rem 1.5rem 1.2rem;
+    }
+    .hero h1 {
+        font-family: Arial, Helvetica, sans-serif;
+        font-weight: 900;
+        font-size: clamp(2rem, 6vw, 3.6rem);
+        color: var(--blue);
+        letter-spacing: 1px;
+    }
+    .hero .rule {
+        width: 130px;
+        height: 5px;
+        background: var(--gold);
+        margin: 1rem auto 0;
+    }
+
+    /* ── Spinning link icons ── */
+    .links {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        gap: 4.5rem;
+        flex-wrap: wrap;
+        padding: 2.6rem 1.5rem 5.5rem;
+        perspective: 900px;
+    }
+    .link-item {
+        text-align: center;
+        text-decoration: none;
+    }
+    .badge {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        background: var(--blue);
+        border: 5px solid var(--gold);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        animation: spin 4.5s linear infinite;
+        box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+    }
+    .badge img {
+        width: 76px;
+        height: 76px;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+    }
+    @keyframes spin {
+        from { transform: rotateY(0deg); }
+        to   { transform: rotateY(360deg); }
+    }
+    .link-item:hover .badge,
+    .link-item:focus .badge { animation-play-state: paused; }
+    .link-item span {
+        display: block;
+        font-weight: bold;
+        color: var(--blue);
+        font-size: 1.1rem;
+        letter-spacing: 0.5px;
+    }
+    .link-item small {
+        display: block;
+        color: #777;
+        font-style: italic;
+        margin-top: 0.2rem;
+    }
+
+    footer {
+        text-align: center;
+        color: #888;
+        font-size: 0.8rem;
+        padding-bottom: 2rem;
+    }
+</style>
+</head>
+<body>
+
+<div class="school-band">
+    <h2>Grant Union High School</h2>
+    <div class="sub">Home of the Pacers</div>
+    <div class="track"><div class="horse"></div></div>
+</div>
+
+<div class="hero">
+    <h1>Mr. Galvan Classpage</h1>
+    <div class="rule"></div>
+</div>
+
+<div class="links">
+    <a class="link-item" href="government.html">
+        <div class="badge"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAYCAYAAADpnJ2CAAAAhklEQVR4nGNgGAVYwP/jOv//H9f5T45eJmo7hhBgJFUDNp8xWl4h2hyiFRIThMRYTFSQEhtfxKgjaCGpiYOQerwWkpsS8emjeyqlu4XDH2DNN+QmFqwWoOXNwZdoRBP1yGYTbSEpZSM+gM2cwRekQ95ClDCmZnbAsAganwPjQ1r6DB3Q3YcA27ov7drJVpkAAAAASUVORK5CYII=" alt="Pixel Capitol Building"></div>
+        <span>U.S. Government</span>
+        <small>Click to enter</small>
+    </a>
+    <a class="link-item" href="econ.html">
+        <div class="badge"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAYUlEQVR4nGNgGFHg5CL1/ycXqf8nRQ8jNsH/x3VIMgRumOUVDPOYyDGIFDD0LWAhRhEsbGERbB53E2vcYQM098FoKhp4C4hODQwMmKkIPa5G44AsMJoPBt4CkgA5VebQBwD94yN22znLbAAAAABJRU5ErkJggg==" alt="Pixel Dollar Sign"></div>
+        <span>Economics</span>
+        <small>Click to enter</small>
+    </a>
+</div>
+
+<footer>&copy; Mr. Galvan &mdash; Grant Union High School</footer>
+
+</body>
+</html>
