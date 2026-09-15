@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PPF Quiz — Economics</title>
+<style>
+    :root {
+        --navy: #14532d;
+        --red: #8b2432;
+        --gold: #c4952e;
+        --paper: #faf9f6;
+        --ink: #1a1a1a;
+        --muted: #6b6b6b;
+        --line: #d8d4cc;
+        --green-ok: #1f7a44;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: Georgia, 'Times New Roman', serif;
+        background: var(--paper);
+        color: var(--ink);
+        display: flex;
+        justify-content: center;
+        padding: 2rem 1rem 3rem;
+    }
+    .wrap { width: 100%; max-width: 760px; }
+    .home-bar { text-align: center; margin-bottom: 1.2rem; }
+    .home-bar a { color: var(--navy); font-size: 0.85rem; text-decoration: none; }
+    .home-bar a:hover { text-decoration: underline; }
+
+    h1 { font-size: 1.6rem; color: var(--navy); text-align: center; margin-bottom: 0.3rem; }
+    .byline { text-align: center; color: var(--muted); font-style: italic; font-size: 0.92rem; margin-bottom: 1.6rem; }
+
+    .progress-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.85rem; color: var(--muted); }
+    .progress-bar { flex: 1; height: 8px; background: #eee; border-radius: 4px; margin: 0 1rem; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--gold); width: 0%; transition: width 0.3s; }
+    .score-tag { font-weight: bold; color: var(--navy); white-space: nowrap; }
+
+    .quiz-card { background: #fff; border: 1px solid var(--line); border-left: 5px solid var(--gold); border-radius: 6px; padding: 1.6rem 1.6rem 1.8rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .q-num { font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
+    .q-prompt { font-size: 1.1rem; font-weight: bold; color: var(--ink); margin-bottom: 1.1rem; line-height: 1.45; }
+
+    .option {
+        display: block; width: 100%; text-align: left; font-family: Georgia, serif; font-size: 0.98rem;
+        background: #f8f7f3; border: 1.5px solid var(--line); border-radius: 5px;
+        padding: 0.7rem 0.9rem; margin-bottom: 0.6rem; cursor: pointer; transition: background 0.15s, border-color 0.15s;
+    }
+    .option:hover:not(.locked) { background: #f0ede2; border-color: var(--gold); }
+    .option.correct { background: #e6f4ea; border-color: var(--green-ok); color: #14532d; font-weight: bold; }
+    .option.incorrect { background: #fbeaea; border-color: var(--red); color: var(--red); font-weight: bold; }
+    .option.locked { cursor: default; }
+
+    .stage { display: flex; gap: 1.4rem; flex-wrap: wrap; align-items: flex-start; justify-content: center; }
+    .chart-box { background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 0.7rem; }
+    svg { display: block; touch-action: none; }
+    .readout { width: 220px; background: #f8f7f3; border: 1px solid var(--line); border-radius: 6px; padding: 0.9rem 1rem; font-size: 0.88rem; }
+    .readout .num-row { display: flex; justify-content: space-between; padding: 0.2rem 0; border-bottom: 1px solid #eee; }
+    .readout .val { font-weight: bold; color: var(--navy); }
+    .readout .hint { color: var(--muted); font-size: 0.8rem; margin-top: 0.6rem; line-height: 1.4; }
+    .rates-box {
+        margin-top: 0.7rem;
+        padding-top: 0.6rem;
+        border-top: 1px dashed var(--line);
+        font-size: 0.82rem;
+        line-height: 1.6;
+        color: var(--navy);
+    }
+    .rates-box .rate-row { display: flex; justify-content: space-between; }
+    .rates-box .rate-row span:last-child { font-weight: bold; }
+
+    .check-btn {
+        display: block; margin: 1rem auto 0; font-family: Georgia, serif; font-size: 0.92rem;
+        background: var(--navy); color: #fff; border: none; border-radius: 5px;
+        padding: 0.6rem 1.4rem; cursor: pointer;
+    }
+    .check-btn:hover { background: #0e3d21; }
+    .check-btn:disabled { background: #aaa; cursor: default; }
+
+    .feedback { margin-top: 1rem; padding: 0.9rem 1rem; border-radius: 5px; font-size: 0.92rem; line-height: 1.5; display: none; }
+    .feedback.show { display: block; }
+    .feedback.wrong-fb { background: #fbeaea; border-left: 4px solid var(--red); }
+    .feedback.right-fb { background: #e6f4ea; border-left: 4px solid var(--green-ok); }
+    .feedback .verdict { font-weight: bold; margin-bottom: 0.3rem; }
+    .feedback.wrong-fb .verdict { color: var(--red); }
+    .feedback.right-fb .verdict { color: var(--green-ok); }
+
+    .next-btn {
+        display: none; margin-top: 1.3rem; font-family: Georgia, serif; font-size: 0.95rem;
+        background: var(--navy); color: #fff; border: none; border-radius: 5px;
+        padding: 0.65rem 1.4rem; cursor: pointer; float: right;
+    }
+    .next-btn.show { display: inline-block; }
+    .next-btn:hover { background: #0e3d21; }
+
+    .result-card { display: none; text-align: center; background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 2.5rem 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .result-card.show { display: block; }
+    .result-card h2 { color: var(--navy); font-size: 1.8rem; margin-bottom: 0.6rem; }
+    .result-card .result-score { font-size: 2.6rem; font-weight: bold; color: var(--gold); margin: 0.6rem 0; }
+    .result-card p { color: var(--muted); margin-bottom: 1.6rem; }
+    .retry-btn { font-family: Georgia, serif; font-size: 0.95rem; background: var(--gold); color: #3a2c00; border: none; border-radius: 5px; padding: 0.7rem 1.6rem; cursor: pointer; font-weight: bold; }
+    .retry-btn:hover { background: #b58a26; }
+
+    .review-list { text-align: left; margin-top: 2rem; border-top: 1px solid var(--line); padding-top: 1.6rem; }
+    .review-item { background: #f8f7f3; border-left: 4px solid var(--line); border-radius: 4px; padding: 0.9rem 1.1rem; margin-bottom: 0.9rem; }
+    .review-item.item-right { border-left-color: var(--green-ok); }
+    .review-item.item-wrong { border-left-color: var(--red); }
+    .review-q { font-weight: bold; margin-bottom: 0.4rem; font-size: 0.95rem; }
+    .review-tag { display: inline-block; font-size: 0.72rem; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; padding: 0.15rem 0.5rem; border-radius: 3px; margin-bottom: 0.5rem; }
+    .review-tag.item-right { background: #e6f4ea; color: var(--green-ok); }
+    .review-tag.item-wrong { background: #fbeaea; color: var(--red); }
+    .review-ans { font-size: 0.88rem; margin-bottom: 0.2rem; }
+    .review-ans .yours-wrong { color: var(--red); }
+    .review-ans .correct-ans { color: var(--green-ok); font-weight: bold; }
+    .review-explain { font-size: 0.85rem; color: var(--muted); margin-top: 0.4rem; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+    <div class="home-bar"><a href="econ.html">&larr; Back to Economics</a></div>
+    <h1>PPF Quiz</h1>
+    <div class="byline">Plot points on the graph and answer opportunity-cost questions</div>
+
+    <div class="progress-row">
+        <span id="qCounter">Question 1 of 12</span>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <span class="score-tag" id="scoreTag">Score: 0</span>
+    </div>
+
+    <div class="quiz-card" id="quizCard">
+        <div class="q-num" id="qTag"></div>
+        <div class="q-prompt" id="qPrompt"></div>
+
+        <div id="mcBlock">
+            <div class="chart-box" id="mcChartBox" style="margin:0 auto 1.1rem; width:fit-content;"><svg id="mcChart" width="340" height="260" viewBox="0 0 340 260"></svg></div>
+            <div id="optionsWrap"></div>
+        </div>
+
+        <div id="plotBlock" style="display:none;">
+            <div class="stage">
+                <div class="chart-box"><svg id="chart" width="360" height="290" viewBox="0 0 360 290"></svg></div>
+                <div class="readout">
+                    <div class="num-row"><span id="xLabelR"></span><span class="val" id="xVal">0</span></div>
+                    <div class="num-row"><span id="yLabelR"></span><span class="val" id="yVal">0</span></div>
+                    <div class="rates-box" id="ratesBox"></div>
+                    <div class="hint">Drag the point onto the line, then click Check Answer.</div>
+                </div>
+            </div>
+            <button class="check-btn" id="checkBtn">Check Answer</button>
+        </div>
+
+        <div class="feedback" id="feedback">
+            <div class="verdict" id="verdict"></div>
+            <div id="explainText"></div>
+        </div>
+        <button class="next-btn" id="nextBtn">Next Question &rarr;</button>
+    </div>
+
+    <div class="result-card" id="resultCard">
+        <h2>Quiz Complete!</h2>
+        <div class="result-score" id="finalScore"></div>
+        <p id="resultMsg"></p>
+        <button class="retry-btn" id="retryBtn">Try Again</button>
+        <div class="review-list" id="reviewList"></div>
+    </div>
+</div>
+
+<script>
+(function () {
+    const NS = 'http://www.w3.org/2000/svg';
+
+    // ── PPF scenarios used by plot questions ──
+    const SCENARIOS = {
+        bakery: { xLabel: "🍞 Bread Loaves", yLabel: "🎂 Cakes", xName: "Bread Loaves", yName: "Cakes", xIcon: "🍞", yIcon: "🎂", xUnit: "loaf", xUnitPl: "loaves", yUnit: "cake", yUnitPl: "cakes", xMax: 60, yMax: 30, step: 10, color: "#8b2432", xRate: 10, yRate: 5 },
+        farm:   { xLabel: "🌽 Corn (bu.)",   yLabel: "🌾 Wheat (bu.)", xName: "Corn", yName: "Wheat", xIcon: "🌽", yIcon: "🌾", xUnit: "bushel", xUnitPl: "bushels", yUnit: "bushel", yUnitPl: "bushels", xMax: 100, yMax: 50, step: 20, color: "#14532d", xRate: 20, yRate: 10 },
+        factory:{ xLabel: "🤖 Robots",       yLabel: "🪆 Dolls",       xName: "Robots", yName: "Dolls", xIcon: "🤖", yIcon: "🪆", xUnit: "robot", xUnitPl: "robots", yUnit: "doll", yUnitPl: "dolls", xMax: 40, yMax: 80, step: 10, color: "#c4952e", xRate: 10, yRate: 20 }
+    };
+    function curveY(s, x) { return s.yMax * (1 - x / s.xMax); }
+
+    // ── The 12 questions: alternating plot and multiple-choice ──
+    const MC_CHARTS = {
+        cars1: { xMax: 30, yMax: 50, xStep: 10, yStep: 10, xIcon: "🚗", yIcon: "🚚", xName: "Cars", yName: "Trucks", color: "#8b2432",
+            points: [{ x: 10, y: 40, label: "A" }, { x: 20, y: 30, label: "B" }] },
+        bakery_mc: { xMax: 60, yMax: 30, xStep: 20, yStep: 10, xIcon: "🍞", yIcon: "🎂", xName: "Bread Loaves", yName: "Cakes", color: "#8b2432",
+            points: [{ x: 20, y: 20, label: "" }, { x: 40, y: 10, label: "" }] },
+        farm_mc: { xMax: 100, yMax: 50, xStep: 20, yStep: 10, xIcon: "🌽", yIcon: "🌾", xName: "Corn", yName: "Wheat", color: "#14532d",
+            points: [{ x: 20, y: 40, label: "" }, { x: 60, y: 20, label: "" }] },
+        factory_mc: { xMax: 40, yMax: 80, xStep: 10, yStep: 20, xIcon: "🤖", yIcon: "🪆", xName: "Robots", yName: "Dolls", color: "#c4952e",
+            points: [{ x: 10, y: 60, label: "" }, { x: 20, y: 40, label: "" }] },
+        notebooks_mc: { xMax: 16, yMax: 24, xStep: 4, yStep: 6, xIcon: "📓", yIcon: "🛹", xName: "Notebooks", yName: "Skateboards", color: "#14532d",
+            points: [{ x: 0, y: 20, label: "E" }, { x: 8, y: 12, label: "F" }] },
+        cars2: { xMax: 50, yMax: 20, xStep: 10, yStep: 5, xIcon: "🚗", yIcon: "🚚", xName: "Cars", yName: "Trucks", color: "#c4952e",
+            points: [{ x: 30, y: 15, label: "G" }, { x: 40, y: 0, label: "H" }] }
+    };
+
+    const QUESTIONS = [
+        {
+            type: 'plot', scenario: 'bakery', targetX: 30,
+            prompt: "Ana's Bakery can make 60 loaves of bread OR 30 cakes using all 6 working hours. Plot the point where she spends 3 hours on bread (and the rest on cakes).",
+            explain: "3 hours × 10 loaves/hour = 30 loaves. The remaining 3 hours go to cakes: 3 × 5/hour = 15 cakes. Correct point: (30, 15)."
+        },
+        {
+            type: 'mc', chart: 'cars1',
+            prompt: "A country's PPF shows: at Point A, it produces 10 cars & 40 trucks. At Point B, it produces 20 cars & 30 trucks. What is the opportunity cost of moving from A to B, in trucks given up?",
+            options: ["5", "10", "15", "20"], correct: 1,
+            explain: "Trucks fell from 40 to 30 — a loss of 10 trucks — while cars rose from 10 to 20."
+        },
+        {
+            type: 'plot', scenario: 'farm', targetX: 40,
+            prompt: "A farmer can grow 100 bushels of corn OR 50 bushels of wheat using all 5 working hours. Plot the point where the farmer spends 2 hours on corn (and the rest on wheat).",
+            explain: "2 hours × 20 bushels/hour = 40 bushels of corn. The remaining 3 hours go to wheat: 3 × 10/hour = 30 bushels. Correct point: (40, 30)."
+        },
+        {
+            type: 'mc', chart: 'bakery_mc',
+            prompt: "A bakery's PPF: at 20 loaves, it can also make 20 cakes. At 40 loaves, it can make 10 cakes. What is the opportunity cost, in cakes given up, of increasing bread from 20 to 40 loaves?",
+            options: ["5", "10", "15", "20"], correct: 1,
+            explain: "Cakes fell from 20 to 10 — a loss of 10 cakes — while bread rose from 20 to 40 loaves."
+        },
+        {
+            type: 'plot', scenario: 'factory', targetX: 10,
+            prompt: "A toy factory can build 40 robots OR 80 dolls using all 4 working hours. Plot the point where workers spend 1 hour on robots (and the rest on dolls).",
+            explain: "1 hour × 10 robots/hour = 10 robots. The remaining 3 hours go to dolls: 3 × 20/hour = 60 dolls. Correct point: (10, 60)."
+        },
+        {
+            type: 'mc', chart: 'farm_mc',
+            prompt: "A farm's PPF: at 20 bushels of corn, 40 bushels of wheat are possible. At 60 bushels of corn, only 20 bushels of wheat are possible. What is the opportunity cost, in wheat given up, of increasing corn from 20 to 60 bushels?",
+            options: ["10", "20", "30", "40"], correct: 1,
+            explain: "Wheat fell from 40 to 20 — a loss of 20 bushels — while corn rose from 20 to 60."
+        },
+        {
+            type: 'plot', scenario: 'bakery', targetX: 50,
+            prompt: "Using the same bakery (60 loaves OR 30 cakes, 6 hours total), plot the point where Ana spends 5 hours on bread.",
+            explain: "5 hours × 10 loaves/hour = 50 loaves. The remaining 1 hour goes to cakes: 1 × 5/hour = 5 cakes. Correct point: (50, 5)."
+        },
+        {
+            type: 'mc', chart: 'factory_mc',
+            prompt: "A factory's PPF: at 10 robots, 60 dolls are possible. At 20 robots, 40 dolls are possible. What is the opportunity cost, in dolls given up, of increasing robots from 10 to 20?",
+            options: ["10", "15", "20", "25"], correct: 2,
+            explain: "Dolls fell from 60 to 40 — a loss of 20 — while robots rose from 10 to 20."
+        },
+        {
+            type: 'plot', scenario: 'farm', targetX: 80,
+            prompt: "Using the same farm (100 bushels corn OR 50 bushels wheat, 5 hours total), plot the point where the farmer spends 4 hours on corn.",
+            explain: "4 hours × 20 bushels/hour = 80 bushels of corn. The remaining 1 hour goes to wheat: 1 × 10/hour = 10 bushels. Correct point: (80, 10)."
+        },
+        {
+            type: 'mc', chart: 'notebooks_mc',
+            prompt: "A PPF shows Point E: 0 notebooks & 20 skateboards. Point F: 8 notebooks & 12 skateboards. What is the opportunity cost, in skateboards given up, of moving from E to F?",
+            options: ["4", "6", "8", "10"], correct: 2,
+            explain: "Skateboards fell from 20 to 12 — a loss of 8 — while notebooks rose from 0 to 8."
+        },
+        {
+            type: 'plot', scenario: 'factory', targetX: 30,
+            prompt: "Using the same toy factory (40 robots OR 80 dolls, 4 hours total), plot the point where workers spend 3 hours on robots.",
+            explain: "3 hours × 10 robots/hour = 30 robots. The remaining 1 hour goes to dolls: 1 × 20/hour = 20 dolls. Correct point: (30, 20)."
+        },
+        {
+            type: 'mc', chart: 'cars2',
+            prompt: "A PPF shows: at Point G, 30 cars & 15 trucks. At Point H, 40 cars & 0 trucks. What is the opportunity cost, in trucks given up, of moving from G to H?",
+            options: ["5", "10", "15", "20"], correct: 2,
+            explain: "Trucks fell from 15 to 0 — a loss of 15 — while cars rose from 30 to 40."
+        }
+    ];
+
+    let current = 0;
+    let score = 0;
+    let answered = false;
+    let userAnswers = [];
+    let dot, line, guideX, guideY, chartScenario;
+
+    const qCounter = document.getElementById('qCounter');
+    const progressFill = document.getElementById('progressFill');
+    const scoreTag = document.getElementById('scoreTag');
+    const qTag = document.getElementById('qTag');
+    const qPrompt = document.getElementById('qPrompt');
+    const mcBlock = document.getElementById('mcBlock');
+    const plotBlock = document.getElementById('plotBlock');
+    const optionsWrap = document.getElementById('optionsWrap');
+    const feedback = document.getElementById('feedback');
+    const verdict = document.getElementById('verdict');
+    const explainText = document.getElementById('explainText');
+    const nextBtn = document.getElementById('nextBtn');
+    const checkBtn = document.getElementById('checkBtn');
+    const quizCard = document.getElementById('quizCard');
+    const resultCard = document.getElementById('resultCard');
+    const finalScore = document.getElementById('finalScore');
+    const resultMsg = document.getElementById('resultMsg');
+    const retryBtn = document.getElementById('retryBtn');
+    const svg = document.getElementById('chart');
+
+    const PAD_L = 50, PAD_B = 40, PAD_T = 14, PAD_R = 14;
+    const SVG_W = 360, SVG_H = 290;
+    const PLOT_W = SVG_W - PAD_L - PAD_R;
+    const PLOT_H = SVG_H - PAD_T - PAD_B;
+
+    function el(tag, attrs) {
+        const e = document.createElementNS(NS, tag);
+        for (const k in attrs) e.setAttribute(k, attrs[k]);
+        return e;
+    }
+    function toPx(s, x, y) {
+        return { x: PAD_L + (x / s.xMax) * PLOT_W, y: (SVG_H - PAD_B) - (y / s.yMax) * PLOT_H };
+    }
+    function pxToX(s, pxX) {
+        let x = ((pxX - PAD_L) / PLOT_W) * s.xMax;
+        x = Math.round(x / s.step) * s.step;
+        return Math.min(s.xMax, Math.max(0, x));
+    }
+
+    function buildChart(scenarioKey, startX) {
+        const s = SCENARIOS[scenarioKey];
+        chartScenario = s;
+        svg.innerHTML = '';
+        for (let x = 0; x <= s.xMax; x += s.step) {
+            const a = toPx(s, x, 0), b = toPx(s, x, s.yMax);
+            svg.appendChild(el('line', { x1: a.x, y1: a.y, x2: b.x, y2: b.y, stroke: '#f0f0f0', 'stroke-width': 1 }));
+        }
+        svg.appendChild(el('line', { x1: PAD_L, y1: SVG_H - PAD_B, x2: SVG_W - 6, y2: SVG_H - PAD_B, stroke: '#1a1a1a', 'stroke-width': 1.4 }));
+        svg.appendChild(el('line', { x1: PAD_L, y1: SVG_H - PAD_B, x2: PAD_L, y2: 6, stroke: '#1a1a1a', 'stroke-width': 1.4 }));
+        for (let x = 0; x <= s.xMax; x += s.step) {
+            const pt = toPx(s, x, 0);
+            const t = el('text', { x: pt.x, y: SVG_H - PAD_B + 15, 'text-anchor': 'middle', 'font-size': 9, fill: '#666', 'font-family': 'Georgia, serif' });
+            t.textContent = x;
+            svg.appendChild(t);
+        }
+        const yStep = s.yMax / (s.xMax / s.step);
+        for (let y = 0; y <= s.yMax + 0.01; y += yStep) {
+            const pt = toPx(s, 0, y);
+            const t = el('text', { x: PAD_L - 7, y: pt.y + 3, 'text-anchor': 'end', 'font-size': 9, fill: '#666', 'font-family': 'Georgia, serif' });
+            t.textContent = Math.round(y);
+            svg.appendChild(t);
+        }
+        const axLabelX = el('text', { x: PAD_L + PLOT_W / 2, y: SVG_H - 4, 'text-anchor': 'middle', 'font-size': 11, fill: '#333', 'font-family': 'Georgia, serif' });
+        axLabelX.textContent = `${s.xLabel}`;
+        svg.appendChild(axLabelX);
+        const axLabelY = el('text', { x: 12, y: PAD_T + PLOT_H / 2, 'text-anchor': 'middle', 'font-size': 11, fill: '#333', 'font-family': 'Georgia, serif', transform: `rotate(-90 12 ${PAD_T + PLOT_H / 2})` });
+        axLabelY.textContent = `${s.yLabel}`;
+        svg.appendChild(axLabelY);
+        let d = '';
+        for (let i = 0; i <= 20; i++) {
+            const x = (s.xMax * i) / 20;
+            const pt = toPx(s, x, curveY(s, x));
+            d += (i === 0 ? 'M' : 'L') + pt.x.toFixed(1) + ',' + pt.y.toFixed(1) + ' ';
+        }
+        line = el('path', { d, fill: 'none', stroke: s.color, 'stroke-width': 2.5, 'stroke-linecap': 'round' });
+        svg.appendChild(line);
+        guideX = el('line', { stroke: s.color, 'stroke-width': 1, 'stroke-dasharray': '4,3', opacity: 0.6 });
+        guideY = el('line', { stroke: s.color, 'stroke-width': 1, 'stroke-dasharray': '4,3', opacity: 0.6 });
+        svg.appendChild(guideX); svg.appendChild(guideY);
+        dot = el('circle', { r: 8, fill: s.color, stroke: '#fff', 'stroke-width': 2, cursor: 'grab' });
+        svg.appendChild(dot);
+
+        document.getElementById('xLabelR').textContent = s.xLabel;
+        document.getElementById('yLabelR').textContent = s.yLabel;
+        document.getElementById('ratesBox').innerHTML =
+            `<div class="rate-row"><span>${s.xIcon} ${s.xName}:</span><span>${s.xRate} ${s.xUnitPl}/hr</span></div>` +
+            `<div class="rate-row"><span>${s.yIcon} ${s.yName}:</span><span>${s.yRate} ${s.yUnitPl}/hr</span></div>`;
+        setChartPoint(startX);
+        dot.addEventListener('mousedown', onDown);
+        dot.addEventListener('touchstart', onDown, { passive: false });
+    }
+
+    function setChartPoint(x) {
+        const s = chartScenario;
+        const y = curveY(s, x);
+        const pt = toPx(s, x, y);
+        dot.setAttribute('cx', pt.x); dot.setAttribute('cy', pt.y);
+        guideX.setAttribute('x1', pt.x); guideX.setAttribute('y1', pt.y);
+        guideX.setAttribute('x2', pt.x); guideX.setAttribute('y2', SVG_H - PAD_B);
+        guideY.setAttribute('x1', PAD_L); guideY.setAttribute('y1', pt.y);
+        guideY.setAttribute('x2', pt.x); guideY.setAttribute('y2', pt.y);
+        document.getElementById('xVal').textContent = Math.round(x);
+        document.getElementById('yVal').textContent = Math.round(y);
+    }
+
+    let dragging = false;
+    function pointerX(evt) {
+        const rect = svg.getBoundingClientRect();
+        const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
+        return (clientX - rect.left) * (SVG_W / rect.width);
+    }
+    function onDown(evt) { if (answered) return; dragging = true; dot.setAttribute('cursor', 'grabbing'); evt.preventDefault(); }
+    function onMove(evt) {
+        if (!dragging) return;
+        const x = pxToX(chartScenario, pointerX(evt));
+        setChartPoint(x);
+        evt.preventDefault();
+    }
+    function onUp() { if (!dragging) return; dragging = false; dot.setAttribute('cursor', 'grab'); }
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('touchmove', onMove, { passive: false });
+    window.addEventListener('mouseup', onUp);
+    window.addEventListener('touchend', onUp);
+
+    function buildMiniChart(key) {
+        const c = MC_CHARTS[key];
+        const svg2 = document.getElementById('mcChart');
+        svg2.innerHTML = '';
+        const W = 340, H = 260, pL = 50, pB = 36, pT = 14, pR = 14;
+        const pw = W - pL - pR, ph = H - pT - pB;
+        function px(x, y) { return { x: pL + (x / c.xMax) * pw, y: (H - pB) - (y / c.yMax) * ph }; }
+
+        for (let x = 0; x <= c.xMax; x += c.xStep) {
+            const a = px(x, 0), b = px(x, c.yMax);
+            svg2.appendChild(el('line', { x1: a.x, y1: a.y, x2: b.x, y2: b.y, stroke: '#f0f0f0', 'stroke-width': 1 }));
+        }
+        svg2.appendChild(el('line', { x1: pL, y1: H - pB, x2: W - 6, y2: H - pB, stroke: '#1a1a1a', 'stroke-width': 1.4 }));
+        svg2.appendChild(el('line', { x1: pL, y1: H - pB, x2: pL, y2: 6, stroke: '#1a1a1a', 'stroke-width': 1.4 }));
+        for (let x = 0; x <= c.xMax; x += c.xStep) {
+            const pt = px(x, 0);
+            const t = el('text', { x: pt.x, y: H - pB + 15, 'text-anchor': 'middle', 'font-size': 9, fill: '#666', 'font-family': 'Georgia, serif' });
+            t.textContent = x;
+            svg2.appendChild(t);
+        }
+        for (let y = 0; y <= c.yMax + 0.01; y += c.yStep) {
+            const pt = px(0, y);
+            const t = el('text', { x: pL - 7, y: pt.y + 3, 'text-anchor': 'end', 'font-size': 9, fill: '#666', 'font-family': 'Georgia, serif' });
+            t.textContent = Math.round(y);
+            svg2.appendChild(t);
+        }
+        const lx = el('text', { x: pL + pw / 2, y: H - 4, 'text-anchor': 'middle', 'font-size': 11, fill: '#333', 'font-family': 'Georgia, serif' });
+        lx.textContent = `${c.xIcon} ${c.xName}`;
+        svg2.appendChild(lx);
+        const ly = el('text', { x: 12, y: pT + ph / 2, 'text-anchor': 'middle', 'font-size': 11, fill: '#333', 'font-family': 'Georgia, serif', transform: `rotate(-90 12 ${pT + ph / 2})` });
+        ly.textContent = `${c.yIcon} ${c.yName}`;
+        svg2.appendChild(ly);
+
+        // connecting line + the two labeled points, with dashed guides to axes
+        const p1 = px(c.points[0].x, c.points[0].y);
+        const p2 = px(c.points[1].x, c.points[1].y);
+        svg2.appendChild(el('line', { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y, stroke: c.color, 'stroke-width': 2.5, 'stroke-linecap': 'round' }));
+
+        c.points.forEach(pt => {
+            const p = px(pt.x, pt.y);
+            svg2.appendChild(el('line', { x1: pL, y1: p.y, x2: p.x, y2: p.y, stroke: c.color, 'stroke-width': 1, 'stroke-dasharray': '3,3', opacity: 0.55 }));
+            svg2.appendChild(el('line', { x1: p.x, y1: p.y, x2: p.x, y2: H - pB, stroke: c.color, 'stroke-width': 1, 'stroke-dasharray': '3,3', opacity: 0.55 }));
+            svg2.appendChild(el('circle', { cx: p.x, cy: p.y, r: 6, fill: c.color, stroke: '#fff', 'stroke-width': 1.5 }));
+            if (pt.label) {
+                const lbl = el('text', { x: p.x, y: p.y - 11, 'text-anchor': 'middle', 'font-size': 12, 'font-style': 'italic', fill: '#222', 'font-family': 'Georgia, serif' });
+                lbl.textContent = pt.label;
+                svg2.appendChild(lbl);
+            }
+        });
+    }
+
+    function loadQuestion() {
+        answered = false;
+        const q = QUESTIONS[current];
+        qCounter.textContent = `Question ${current + 1} of ${QUESTIONS.length}`;
+        progressFill.style.width = (current / QUESTIONS.length * 100) + '%';
+        scoreTag.textContent = `Score: ${score}`;
+        qTag.textContent = q.type === 'plot' ? 'Plot the Point' : 'Opportunity Cost';
+        qPrompt.textContent = q.prompt;
+        feedback.classList.remove('show', 'wrong-fb', 'right-fb');
+        nextBtn.classList.remove('show');
+
+        if (q.type === 'mc') {
+            mcBlock.style.display = 'block';
+            plotBlock.style.display = 'none';
+            buildMiniChart(q.chart);
+            optionsWrap.innerHTML = '';
+            q.options.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'option';
+                btn.textContent = opt;
+                btn.addEventListener('click', () => selectMC(i));
+                optionsWrap.appendChild(btn);
+            });
+        } else {
+            mcBlock.style.display = 'none';
+            plotBlock.style.display = 'block';
+            checkBtn.disabled = false;
+            checkBtn.textContent = 'Check Answer';
+            const s = SCENARIOS[q.scenario];
+            const startX = q.targetX > s.xMax / 2 ? s.step : s.xMax - s.step;
+            buildChart(q.scenario, startX);
+        }
+    }
+
+    function selectMC(i) {
+        if (answered) return;
+        answered = true;
+        const q = QUESTIONS[current];
+        const opts = optionsWrap.querySelectorAll('.option');
+        opts.forEach(o => o.classList.add('locked'));
+        const isRight = i === q.correct;
+        if (isRight) {
+            score++;
+            opts[i].classList.add('correct');
+            verdict.textContent = 'Correct!';
+            feedback.classList.add('show', 'right-fb');
+        } else {
+            opts[i].classList.add('incorrect');
+            opts[q.correct].classList.add('correct');
+            verdict.textContent = 'Not quite.';
+            feedback.classList.add('show', 'wrong-fb');
+        }
+        explainText.textContent = q.explain;
+        scoreTag.textContent = `Score: ${score}`;
+        nextBtn.classList.add('show');
+        userAnswers.push({ correct: isRight, yourAnswerText: q.options[i], correctAnswerText: q.options[q.correct] });
+    }
+
+    checkBtn.addEventListener('click', () => {
+        if (answered) return;
+        answered = true;
+        checkBtn.disabled = true;
+        const q = QUESTIONS[current];
+        const studentX = parseFloat(document.getElementById('xVal').textContent);
+        const studentY = parseFloat(document.getElementById('yVal').textContent);
+        const s = SCENARIOS[q.scenario];
+        const targetY = Math.round(curveY(s, q.targetX));
+        const isRight = studentX === q.targetX;
+
+        if (isRight) {
+            score++;
+            dot.setAttribute('fill', '#1f7a44');
+            verdict.textContent = 'Correct!';
+            feedback.classList.add('show', 'right-fb');
+        } else {
+            dot.setAttribute('fill', '#8b2432');
+            const correctPt = toPx(s, q.targetX, targetY);
+            const marker = el('circle', { cx: correctPt.x, cy: correctPt.y, r: 7, fill: 'none', stroke: '#1f7a44', 'stroke-width': 3 });
+            svg.appendChild(marker);
+            verdict.textContent = `Not quite — the correct point is (${q.targetX}, ${targetY}), circled in green.`;
+            feedback.classList.add('show', 'wrong-fb');
+        }
+        explainText.textContent = q.explain;
+        scoreTag.textContent = `Score: ${score}`;
+        nextBtn.classList.add('show');
+        userAnswers.push({
+            correct: isRight,
+            yourAnswerText: `(${studentX}, ${studentY})`,
+            correctAnswerText: `(${q.targetX}, ${targetY})`
+        });
+    });
+
+    nextBtn.addEventListener('click', () => {
+        current++;
+        if (current >= QUESTIONS.length) showResults();
+        else loadQuestion();
+    });
+
+    function showResults() {
+        progressFill.style.width = '100%';
+        quizCard.style.display = 'none';
+        resultCard.classList.add('show');
+        finalScore.textContent = `${score} / ${QUESTIONS.length}`;
+        let msg;
+        if (score === QUESTIONS.length) msg = "Perfect score! PPFs and opportunity cost are fully clicked.";
+        else if (score >= QUESTIONS.length * 0.8) msg = "Great work — just a couple to review.";
+        else if (score >= QUESTIONS.length * 0.6) msg = "Good effort — look back over the missed ones.";
+        else msg = "Worth another pass through the PPF lesson before test day.";
+        resultMsg.textContent = msg;
+        renderReview();
+    }
+
+    function renderReview() {
+        const list = document.getElementById('reviewList');
+        list.innerHTML = '<div style="font-weight:bold; color:var(--navy); margin-bottom:1rem; font-size:1.05rem;">Review Your Answers</div>';
+        QUESTIONS.forEach((q, idx) => {
+            const ua = userAnswers[idx];
+            const cls = ua.correct ? 'item-right' : 'item-wrong';
+            const div = document.createElement('div');
+            div.className = 'review-item ' + cls;
+            let ansHtml = ua.correct
+                ? `<div class="review-ans">Your answer: <span class="correct-ans">${ua.yourAnswerText}</span></div>`
+                : `<div class="review-ans">Your answer: <span class="yours-wrong">${ua.yourAnswerText}</span></div><div class="review-ans">Correct answer: <span class="correct-ans">${ua.correctAnswerText}</span></div>`;
+            div.innerHTML =
+                `<span class="review-tag ${cls}">${ua.correct ? 'Correct' : 'Incorrect'}</span>` +
+                `<div class="review-q">${idx + 1}. ${q.prompt}</div>` +
+                ansHtml +
+                `<div class="review-explain">${q.explain}</div>`;
+            list.appendChild(div);
+        });
+    }
+
+    retryBtn.addEventListener('click', () => {
+        current = 0; score = 0; userAnswers = [];
+        resultCard.classList.remove('show');
+        quizCard.style.display = 'block';
+        loadQuestion();
+    });
+
+    loadQuestion();
+})();
+</script>
+
+</body>
+</html>

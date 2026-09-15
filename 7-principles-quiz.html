@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>7 Economic Principles Quiz — Economics</title>
+<style>
+    :root {
+        --navy: #14532d;
+        --red: #8b2432;
+        --gold: #c4952e;
+        --paper: #faf9f6;
+        --ink: #1a1a1a;
+        --muted: #6b6b6b;
+        --line: #d8d4cc;
+        --green-ok: #1f7a44;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: Georgia, 'Times New Roman', serif;
+        background: var(--paper);
+        color: var(--ink);
+        display: flex;
+        justify-content: center;
+        padding: 2rem 1rem 3rem;
+    }
+    .wrap { width: 100%; max-width: 680px; }
+    .home-bar { text-align: center; margin-bottom: 1.2rem; }
+    .home-bar a { color: var(--navy); font-size: 0.85rem; text-decoration: none; }
+    .home-bar a:hover { text-decoration: underline; }
+
+    h1 {
+        font-size: 1.6rem;
+        color: var(--navy);
+        text-align: center;
+        margin-bottom: 0.3rem;
+    }
+    .byline {
+        text-align: center;
+        color: var(--muted);
+        font-style: italic;
+        font-size: 0.92rem;
+        margin-bottom: 1.6rem;
+    }
+
+    .progress-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        font-size: 0.85rem;
+        color: var(--muted);
+    }
+    .progress-bar {
+        flex: 1;
+        height: 8px;
+        background: #eee;
+        border-radius: 4px;
+        margin: 0 1rem;
+        overflow: hidden;
+    }
+    .progress-fill {
+        height: 100%;
+        background: var(--gold);
+        width: 0%;
+        transition: width 0.3s;
+    }
+    .score-tag {
+        font-weight: bold;
+        color: var(--navy);
+        white-space: nowrap;
+    }
+
+    .quiz-card {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-left: 5px solid var(--gold);
+        border-radius: 6px;
+        padding: 1.6rem 1.6rem 1.8rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .q-num {
+        font-size: 0.75rem;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 0.5rem;
+    }
+    .q-prompt {
+        font-size: 1.15rem;
+        font-weight: bold;
+        color: var(--ink);
+        margin-bottom: 1.2rem;
+        line-height: 1.4;
+    }
+    .option {
+        display: block;
+        width: 100%;
+        text-align: left;
+        font-family: Georgia, serif;
+        font-size: 0.98rem;
+        background: #f8f7f3;
+        border: 1.5px solid var(--line);
+        border-radius: 5px;
+        padding: 0.7rem 0.9rem;
+        margin-bottom: 0.6rem;
+        cursor: pointer;
+        transition: background 0.15s, border-color 0.15s;
+    }
+    .option:hover:not(.locked) {
+        background: #f0ede2;
+        border-color: var(--gold);
+    }
+    .option.correct {
+        background: #e6f4ea;
+        border-color: var(--green-ok);
+        color: #14532d;
+        font-weight: bold;
+    }
+    .option.incorrect {
+        background: #fbeaea;
+        border-color: var(--red);
+        color: var(--red);
+        font-weight: bold;
+    }
+    .option.locked { cursor: default; }
+
+    .feedback {
+        margin-top: 1rem;
+        padding: 0.9rem 1rem;
+        border-radius: 5px;
+        font-size: 0.92rem;
+        line-height: 1.5;
+        display: none;
+    }
+    .feedback.show { display: block; }
+    .feedback.wrong-fb { background: #fbeaea; border-left: 4px solid var(--red); }
+    .feedback.right-fb { background: #e6f4ea; border-left: 4px solid var(--green-ok); }
+    .feedback .verdict { font-weight: bold; margin-bottom: 0.3rem; }
+    .feedback.wrong-fb .verdict { color: var(--red); }
+    .feedback.right-fb .verdict { color: var(--green-ok); }
+
+    .next-btn {
+        display: none;
+        margin-top: 1.3rem;
+        font-family: Georgia, serif;
+        font-size: 0.95rem;
+        background: var(--navy);
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        padding: 0.65rem 1.4rem;
+        cursor: pointer;
+        float: right;
+    }
+    .next-btn.show { display: inline-block; }
+    .next-btn:hover { background: #0e3d21; }
+
+    .result-card {
+        display: none;
+        text-align: center;
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 2.5rem 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .result-card.show { display: block; }
+    .result-card h2 { color: var(--navy); font-size: 1.8rem; margin-bottom: 0.6rem; }
+    .result-card .result-score { font-size: 2.6rem; font-weight: bold; color: var(--gold); margin: 0.6rem 0; }
+    .result-card p { color: var(--muted); margin-bottom: 1.6rem; }
+    .retry-btn {
+        font-family: Georgia, serif;
+        font-size: 0.95rem;
+        background: var(--gold);
+        color: #3a2c00;
+        border: none;
+        border-radius: 5px;
+        padding: 0.7rem 1.6rem;
+        cursor: pointer;
+        font-weight: bold;
+    }
+    .retry-btn:hover { background: #b58a26; }
+
+    .review-list {
+        text-align: left;
+        margin-top: 2rem;
+        border-top: 1px solid var(--line);
+        padding-top: 1.6rem;
+    }
+    .review-item {
+        background: #f8f7f3;
+        border-left: 4px solid var(--line);
+        border-radius: 4px;
+        padding: 0.9rem 1.1rem;
+        margin-bottom: 0.9rem;
+    }
+    .review-item.item-right { border-left-color: var(--green-ok); }
+    .review-item.item-wrong { border-left-color: var(--red); }
+    .review-q { font-weight: bold; margin-bottom: 0.4rem; font-size: 0.95rem; }
+    .review-tag {
+        display: inline-block;
+        font-size: 0.72rem;
+        font-weight: bold;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        padding: 0.15rem 0.5rem;
+        border-radius: 3px;
+        margin-bottom: 0.5rem;
+    }
+    .review-tag.item-right { background: #e6f4ea; color: var(--green-ok); }
+    .review-tag.item-wrong { background: #fbeaea; color: var(--red); }
+    .review-ans { font-size: 0.88rem; margin-bottom: 0.2rem; }
+    .review-ans .yours-wrong { color: var(--red); text-decoration: line-through; }
+    .review-ans .correct-ans { color: var(--green-ok); font-weight: bold; }
+    .review-explain { font-size: 0.85rem; color: var(--muted); margin-top: 0.4rem; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+    <div class="home-bar"><a href="econ.html">&larr; Back to Economics</a></div>
+    <h1>The 7 Economic Principles</h1>
+    <div class="byline">Read the scenario, then identify which principle it demonstrates</div>
+
+    <div class="progress-row">
+        <span id="qCounter">Question 1 of 14</span>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <span class="score-tag" id="scoreTag">Score: 0</span>
+    </div>
+
+    <div class="quiz-card" id="quizCard">
+        <div class="q-num" id="qLesson"></div>
+        <div class="q-prompt" id="qPrompt"></div>
+        <div id="optionsWrap"></div>
+        <div class="feedback" id="feedback">
+            <div class="verdict" id="verdict"></div>
+            <div id="explainText"></div>
+        </div>
+        <button class="next-btn" id="nextBtn">Next Question &rarr;</button>
+    </div>
+
+    <div class="result-card" id="resultCard">
+        <h2>Quiz Complete!</h2>
+        <div class="result-score" id="finalScore"></div>
+        <p id="resultMsg"></p>
+        <button class="retry-btn" id="retryBtn">Try Again</button>
+        <div class="review-list" id="reviewList"></div>
+    </div>
+</div>
+
+<script>
+(function () {
+    const PRINCIPLES = [
+        "Scarcity Forces Tradeoffs",
+        "Costs Versus Benefits",
+        "Thinking at the Margin",
+        "Incentives Matter",
+        "Trade Makes People Better Off",
+        "Markets Coordinate Trade",
+        "Future Consequences Count"
+    ];
+
+    function opts() { return PRINCIPLES.slice(); }
+
+    // 4 questions per principle (28 total) — a fresh random 2-per-principle
+    // selection (14 questions) is drawn from this pool on every load/retry.
+    const QUESTION_POOL = [
+        // ── Scarcity Forces Tradeoffs (principle index 0) ──
+        {
+            principle: 0,
+            prompt: "A family can afford a new car OR a vacation this year, not both.",
+            explain: "Scarcity Forces Tradeoffs: limited resources (money) mean the family can't have everything, so choosing the car means giving up the vacation."
+        },
+        {
+            principle: 0,
+            prompt: "A city has enough budget to repave Main Street or build a new park this year, but not both.",
+            explain: "Scarcity Forces Tradeoffs: the city's limited budget forces a choice between two good options."
+        },
+        {
+            principle: 0,
+            prompt: "A student has one free period and must choose between working on a college application or a chemistry lab report.",
+            explain: "Scarcity Forces Tradeoffs: limited time forces the student to give up one activity to do the other."
+        },
+        {
+            principle: 0,
+            prompt: "A small country has enough steel to build either a bridge or a stadium this year, not both.",
+            explain: "Scarcity Forces Tradeoffs: limited resources (steel) mean the country must choose one project over the other."
+        },
+        // ── Costs Versus Benefits (principle index 1) ──
+        {
+            principle: 1,
+            prompt: "Maria buys a $20 concert ticket because she believes the fun she'll have is worth more to her than the $20 and the evening it costs her.",
+            explain: "Costs Versus Benefits: Maria compared the expected benefit (fun) against the cost (money and time) and chose to act because the benefit was greater."
+        },
+        {
+            principle: 1,
+            prompt: "A company decides not to launch a new product because the expected profit doesn't outweigh the cost of developing and marketing it.",
+            explain: "Costs Versus Benefits: the company compared expected benefits (profit) to costs (development and marketing) and chose not to act because costs won out."
+        },
+        {
+            principle: 1,
+            prompt: "A homeowner installs solar panels because the long-term savings on electricity bills outweigh the upfront installation cost.",
+            explain: "Costs Versus Benefits: the homeowner weighed the upfront cost against the expected future benefit before deciding."
+        },
+        {
+            principle: 1,
+            prompt: "A student chooses not to buy a $200 video game console because she doesn't think she'd play it enough to justify the price.",
+            explain: "Costs Versus Benefits: she compared the benefit (enjoyment) to the cost (money) and decided the cost wasn't worth it."
+        },
+        // ── Thinking at the Margin (principle index 2) ──
+        {
+            principle: 2,
+            prompt: "A factory owner decides whether to run the assembly line for one more hour, based on whether the extra output is worth the extra electricity and labor cost.",
+            explain: "Thinking at the Margin: this is a small, incremental decision (one more hour) rather than an all-or-nothing choice about the whole factory."
+        },
+        {
+            principle: 2,
+            prompt: "A student studies for 30 more minutes because the extra points are worth it to her, but decides against studying a second extra 30 minutes because it isn't worth losing more sleep.",
+            explain: "Thinking at the Margin: she's weighing each additional (marginal) increment of studying separately, not deciding all-or-nothing about studying overall."
+        },
+        {
+            principle: 2,
+            prompt: "A restaurant owner decides whether to stay open for one more hour each night, based on whether the extra revenue covers the extra staff and utility cost of that hour.",
+            explain: "Thinking at the Margin: the owner is evaluating one additional hour at a time, not the decision to run the restaurant at all."
+        },
+        {
+            principle: 2,
+            prompt: "A farmer decides whether to apply one more bag of fertilizer per acre, weighing the extra crop yield against the extra cost of the fertilizer.",
+            explain: "Thinking at the Margin: the farmer is deciding on one additional unit of fertilizer, not an all-or-nothing farming decision."
+        },
+        // ── Incentives Matter (principle index 3) ──
+        {
+            principle: 3,
+            prompt: "When a state raises the tax on cigarettes, fewer people buy them.",
+            explain: "Incentives Matter: the higher price (a financial disincentive) predictably changes people's behavior."
+        },
+        {
+            principle: 3,
+            prompt: "A company starts offering employees a bonus for finishing projects early, and workers begin finishing projects earlier.",
+            explain: "Incentives Matter: the bonus is a reward that changes behavior in a predictable direction."
+        },
+        {
+            principle: 3,
+            prompt: "A city starts fining drivers for parking in bike lanes, and illegal parking in those lanes drops sharply.",
+            explain: "Incentives Matter: the fine is a penalty that predictably discourages the behavior it targets."
+        },
+        {
+            principle: 3,
+            prompt: "A school begins giving out gift cards for perfect attendance, and attendance rates rise.",
+            explain: "Incentives Matter: the reward changes student behavior in the intended direction."
+        },
+        // ── Trade Makes People Better Off (principle index 4) ──
+        {
+            principle: 4,
+            prompt: "A baker who makes excellent bread trades loaves for shoes made by a skilled cobbler, and both end up with better goods than if each tried to make everything themselves.",
+            explain: "Trade Makes People Better Off: specialization plus trade leaves both people with higher-quality goods than they could produce alone."
+        },
+        {
+            principle: 4,
+            prompt: "Two countries each focus on producing what they're best at, then trade with each other, ending up with more total goods than if each tried to produce everything domestically.",
+            explain: "Trade Makes People Better Off: specialization and trade increase the total goods available to both countries."
+        },
+        {
+            principle: 4,
+            prompt: "A student who is great at math tutors a friend in exchange for help with essay writing, and both end up doing better in both subjects than if they'd studied alone.",
+            explain: "Trade Makes People Better Off: each person specializes in their strength and trades, leaving both better off."
+        },
+        {
+            principle: 4,
+            prompt: "A carpenter builds furniture for a farmer in exchange for a season's worth of vegetables, and both end up with goods they couldn't have produced as efficiently alone.",
+            explain: "Trade Makes People Better Off: specialization and voluntary exchange leave both parties with more than they'd have producing everything themselves."
+        },
+        // ── Markets Coordinate Trade (principle index 5) ──
+        {
+            principle: 5,
+            prompt: "Without anyone being in charge, thousands of independent farmers, truckers, and grocers work together every day so that fresh produce reliably ends up on supermarket shelves at a price buyers are willing to pay.",
+            explain: "Markets Coordinate Trade: no central authority is directing this — prices and free exchange coordinate buyers and sellers automatically."
+        },
+        {
+            principle: 5,
+            prompt: "When a hurricane disrupts gasoline supply, prices at the pump rise, which encourages drivers to conserve fuel and suppliers to ship more gasoline to the affected area, without anyone coordinating it directly.",
+            explain: "Markets Coordinate Trade: rising prices alone adjust both buyer and seller behavior to respond to the shortage."
+        },
+        {
+            principle: 5,
+            prompt: "In a busy city, thousands of strangers buy and sell smartphones every day, and somehow the right number of phones ends up in stores without any single organization managing it.",
+            explain: "Markets Coordinate Trade: prices and voluntary exchange bring buyers and sellers together without central direction."
+        },
+        {
+            principle: 5,
+            prompt: "When a popular toy sells out during the holidays, its resale price rises, which signals manufacturers to produce more of it next year.",
+            explain: "Markets Coordinate Trade: the price signal alone coordinates future production decisions, with no central planner involved."
+        },
+        // ── Future Consequences Count (principle index 6) ──
+        {
+            principle: 6,
+            prompt: "A government takes on a large amount of debt today to fund a program, and years later, interest payments on that debt limit how much it can spend on other priorities.",
+            explain: "Future Consequences Count: today's choice sets off a chain of effects that shape what's possible well into the future."
+        },
+        {
+            principle: 6,
+            prompt: "A student who skips studying today to watch TV finds it much harder to pass the final exam months later.",
+            explain: "Future Consequences Count: a choice made today (skipping study time) has consequences that show up much later."
+        },
+        {
+            principle: 6,
+            prompt: "A country that underinvests in education today faces a less skilled workforce and slower economic growth decades later.",
+            explain: "Future Consequences Count: a present-day choice (low investment) ripples forward and shapes outcomes far in the future."
+        },
+        {
+            principle: 6,
+            prompt: "A person who doesn't save any money in their twenties has far fewer options when they want to retire decades later.",
+            explain: "Future Consequences Count: choices made early on compound and shape what's possible much later in life."
+        }
+    ];
+
+    // Draw a fresh 2-questions-per-principle set (14 total) each time, shuffled.
+    function buildQuizSet() {
+        const set = [];
+        for (let p = 0; p < PRINCIPLES.length; p++) {
+            const pool = QUESTION_POOL.filter(q => q.principle === p);
+            const shuffled = pool.slice().sort(() => Math.random() - 0.5);
+            shuffled.slice(0, 2).forEach(q => {
+                set.push({
+                    prompt: q.prompt,
+                    options: opts(),
+                    correct: p,
+                    explain: q.explain
+                });
+            });
+        }
+        return set.sort(() => Math.random() - 0.5);
+    }
+
+    let QUESTIONS = buildQuizSet();
+
+    let current = 0;
+    let score = 0;
+    let answered = false;
+    let userAnswers = [];
+
+    const qCounter = document.getElementById('qCounter');
+    const progressFill = document.getElementById('progressFill');
+    const scoreTag = document.getElementById('scoreTag');
+    const qLesson = document.getElementById('qLesson');
+    const qPrompt = document.getElementById('qPrompt');
+    const optionsWrap = document.getElementById('optionsWrap');
+    const feedback = document.getElementById('feedback');
+    const verdict = document.getElementById('verdict');
+    const explainText = document.getElementById('explainText');
+    const nextBtn = document.getElementById('nextBtn');
+    const quizCard = document.getElementById('quizCard');
+    const resultCard = document.getElementById('resultCard');
+    const finalScore = document.getElementById('finalScore');
+    const resultMsg = document.getElementById('resultMsg');
+    const retryBtn = document.getElementById('retryBtn');
+
+    function loadQuestion() {
+        answered = false;
+        const q = QUESTIONS[current];
+        qCounter.textContent = `Question ${current + 1} of ${QUESTIONS.length}`;
+        progressFill.style.width = ((current) / QUESTIONS.length * 100) + '%';
+        scoreTag.textContent = `Score: ${score}`;
+        qLesson.textContent = 'Scenario';
+        qPrompt.textContent = q.prompt;
+        feedback.classList.remove('show', 'wrong-fb', 'right-fb');
+        nextBtn.classList.remove('show');
+
+        optionsWrap.innerHTML = '';
+        q.options.forEach((opt, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'option';
+            btn.textContent = opt;
+            btn.addEventListener('click', () => selectAnswer(i));
+            optionsWrap.appendChild(btn);
+        });
+    }
+
+    function selectAnswer(i) {
+        if (answered) return;
+        answered = true;
+        const q = QUESTIONS[current];
+        const opts = optionsWrap.querySelectorAll('.option');
+        opts.forEach(o => o.classList.add('locked'));
+
+        if (i === q.correct) {
+            score++;
+            opts[i].classList.add('correct');
+            verdict.textContent = 'Correct!';
+            feedback.classList.add('show', 'right-fb');
+        } else {
+            opts[i].classList.add('incorrect');
+            opts[q.correct].classList.add('correct');
+            verdict.textContent = 'Not quite.';
+            feedback.classList.add('show', 'wrong-fb');
+        }
+        explainText.textContent = q.explain;
+        scoreTag.textContent = `Score: ${score}`;
+        nextBtn.classList.add('show');
+        userAnswers.push({ selected: i, correct: i === q.correct });
+    }
+
+    nextBtn.addEventListener('click', () => {
+        current++;
+        if (current >= QUESTIONS.length) {
+            showResults();
+        } else {
+            loadQuestion();
+        }
+    });
+
+    function showResults() {
+        progressFill.style.width = '100%';
+        quizCard.style.display = 'none';
+        resultCard.classList.add('show');
+        finalScore.textContent = `${score} / ${QUESTIONS.length}`;
+        let msg;
+        if (score === QUESTIONS.length) msg = "Perfect score! You've got Unit 1 down cold.";
+        else if (score >= QUESTIONS.length * 0.8) msg = "Great work — just a couple to review.";
+        else if (score >= QUESTIONS.length * 0.6) msg = "Good effort — look back over the lessons you missed.";
+        else msg = "Worth another pass through the Unit 1 slides before test day.";
+        resultMsg.textContent = msg;
+        renderReview();
+    }
+
+    function renderReview() {
+        const list = document.getElementById('reviewList');
+        list.innerHTML = '<div style="font-weight:bold; color:var(--navy); margin-bottom:1rem; font-size:1.05rem;">Review Your Answers</div>';
+        QUESTIONS.forEach((q, idx) => {
+            const ua = userAnswers[idx];
+            const cls = ua.correct ? 'item-right' : 'item-wrong';
+            const div = document.createElement('div');
+            div.className = 'review-item ' + cls;
+            let ansHtml = '';
+            if (ua.correct) {
+                ansHtml = `<div class="review-ans">Your answer: <span class="correct-ans">${q.options[ua.selected]}</span></div>`;
+            } else {
+                ansHtml = `<div class="review-ans">Your answer: <span class="yours-wrong">${q.options[ua.selected]}</span></div>` +
+                          `<div class="review-ans">Correct answer: <span class="correct-ans">${q.options[q.correct]}</span></div>`;
+            }
+            div.innerHTML =
+                `<span class="review-tag ${cls}">${ua.correct ? 'Correct' : 'Incorrect'}</span>` +
+                `<div class="review-q">${idx + 1}. ${q.prompt}</div>` +
+                ansHtml +
+                `<div class="review-explain">${q.explain}</div>`;
+            list.appendChild(div);
+        });
+    }
+
+    retryBtn.addEventListener('click', () => {
+        current = 0;
+        score = 0;
+        userAnswers = [];
+        QUESTIONS = buildQuizSet();
+        resultCard.classList.remove('show');
+        quizCard.style.display = 'block';
+        loadQuestion();
+    });
+
+    loadQuestion();
+})();
+</script>
+
+</body>
+</html>
