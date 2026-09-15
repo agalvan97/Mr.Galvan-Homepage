@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crusoe &amp; Hawkins's Production Possibilities Frontier</title>
+<style>
+    :root {
+        --green: #14532d;
+        --gold: #c4952e;
+        --paper: #faf9f6;
+        --ink: #1a1a1a;
+        --muted: #6b6b6b;
+        --line: #d8d4cc;
+        --red: #8b2432;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: Georgia, 'Times New Roman', serif;
+        background: var(--paper);
+        color: var(--ink);
+        display: flex;
+        justify-content: center;
+        padding: 1.5rem 1rem 3rem;
+    }
+    .wrap { width: 100%; max-width: 920px; }
+    h1 {
+        font-size: 1.5rem;
+        color: var(--green);
+        text-align: center;
+        margin-bottom: 0.2rem;
+    }
+    .byline {
+        text-align: center;
+        color: var(--muted);
+        font-style: italic;
+        font-size: 0.92rem;
+        margin-bottom: 1.1rem;
+    }
+
+    /* toggle */
+    .toggle {
+        display: flex;
+        justify-content: center;
+        gap: 0.6rem;
+        margin-bottom: 1.4rem;
+        flex-wrap: wrap;
+    }
+    .toggle button {
+        font-family: Georgia, serif;
+        font-size: 0.88rem;
+        background: #fff;
+        border: 1.5px solid var(--line);
+        color: var(--muted);
+        border-radius: 20px;
+        padding: 0.45rem 1.1rem;
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+    .toggle button.active.crusoe { border-color: var(--green); color: var(--green); background: #eaf3ec; font-weight: bold; }
+    .toggle button.active.hawkins { border-color: var(--gold); color: #8a6a1f; background: #faf1de; font-weight: bold; }
+    .toggle button.active.both { border-color: var(--red); color: var(--red); background: #f8ecec; font-weight: bold; }
+    .toggle button.trade.active { border-color: var(--red); color: var(--red); background: #f8ecec; font-weight: bold; }
+    .toggle button.active.page { border-color: #444; color: #fff; background: #444; }
+    .toggle button.active.key { border-color: var(--red); color: var(--red); background: #f8ecec; font-weight: bold; }
+
+    .key-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+        margin-bottom: 1rem;
+    }
+    .key-table th, .key-table td {
+        border: 1px solid var(--line);
+        padding: 0.4rem 0.5rem;
+        text-align: center;
+    }
+    .key-table th { background: #f0eee5; }
+    .key-table td:first-child, .key-table th:first-child { text-align: left; font-weight: bold; }
+
+    .answers-box {
+        max-width: 920px;
+        margin: 1rem auto 0;
+        background: #fff;
+        border: 1px solid var(--line);
+        border-left: 4px solid var(--red);
+        border-radius: 6px;
+        padding: 1rem 1.3rem;
+        font-size: 0.92rem;
+        line-height: 1.7;
+    }
+    .answers-box b { color: var(--red); }
+
+    .stage {
+        display: flex;
+        gap: 1.6rem;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: center;
+    }
+
+    .chart-box {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 1rem;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    svg { display: block; touch-action: none; }
+
+    .panels { display: flex; flex-direction: column; gap: 1rem; width: 270px; }
+    .readout {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 1rem 1.1rem;
+        font-size: 0.9rem;
+        display: none;
+    }
+    .readout.show { display: block; }
+    .readout.crusoe { border-left: 4px solid var(--green); }
+    .readout.hawkins { border-left: 4px solid var(--gold); }
+    .readout h2 {
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+    }
+    .readout.crusoe h2 { color: var(--green); }
+    .readout.hawkins h2 { color: #8a6a1f; }
+
+    .num-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.25rem 0;
+    }
+    .num-row .label { color: var(--muted); font-size: 0.85rem; }
+    .num-row .val { font-weight: bold; }
+    .basket {
+        font-size: 1.05rem;
+        line-height: 1.3;
+        min-height: 1.4rem;
+        letter-spacing: -1px;
+    }
+
+    .oc-box {
+        margin-top: 0.7rem;
+        padding-top: 0.6rem;
+        border-top: 1px dashed var(--line);
+        font-size: 0.85rem;
+        min-height: 3.6rem;
+        line-height: 1.4;
+    }
+    .oc-box b { color: var(--red); }
+
+    .legend {
+        max-width: 920px;
+        margin: 1.2rem auto 0;
+        display: flex;
+        gap: 1.6rem;
+        flex-wrap: wrap;
+        justify-content: center;
+        font-size: 0.82rem;
+        color: var(--muted);
+    }
+    .legend span { display: inline-flex; align-items: center; gap: 0.4rem; }
+    .swatch { width: 20px; height: 3px; display: inline-block; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+    <h1>Production Possibilities Frontier Explorer</h1>
+
+    <div class="toggle" id="pageToggle">
+        <button class="active page" data-page="story">🐚 Crusoe &amp; Hawkins</button>
+        <button class="page" data-page="answers">✅ Worksheet Answer Key</button>
+    </div>
+
+    <div id="storySection">
+    <div class="byline">Drag a point along a curve to see the opportunity cost of that choice</div>
+
+    <div class="toggle" id="modeToggle">
+        <button class="active crusoe" data-mode="crusoe">🐚 Crusoe only</button>
+        <button class="hawkins" data-mode="hawkins">🏝️ Hawkins only</button>
+        <button class="both" data-mode="both">👥 Both</button>
+    </div>
+    <div class="toggle">
+        <button class="trade" id="tradeToggle" data-mode="trade">🔄 Show gains from trade (A/A′, B/B′)</button>
+    </div>
+
+    <div class="stage">
+        <div class="chart-box">
+            <svg id="chart" width="560" height="330" viewBox="0 0 560 330"></svg>
+        </div>
+        <div class="panels">
+            <div class="readout crusoe show" id="panelCrusoe">
+                <h2>Crusoe is producing</h2>
+                <div class="num-row"><span class="label">🥥 Coconuts / day</span><span class="val" id="cC">0</span></div>
+                <div class="basket" id="basketC_c"></div>
+                <div class="num-row"><span class="label">🐟 Fish / day</span><span class="val" id="cF">0</span></div>
+                <div class="basket" id="basketC_f"></div>
+                <div class="oc-box" id="ocCrusoe">Drag Crusoe's gold-green point to see what he gives up.</div>
+            </div>
+            <div class="readout hawkins" id="panelHawkins">
+                <h2>Hawkins is producing</h2>
+                <div class="num-row"><span class="label">🥥 Coconuts / day</span><span class="val" id="hC">0</span></div>
+                <div class="basket" id="basketH_c"></div>
+                <div class="num-row"><span class="label">🐟 Fish / day</span><span class="val" id="hF">0</span></div>
+                <div class="basket" id="basketH_f"></div>
+                <div class="oc-box" id="ocHawkins">Drag Hawkins's point to see what he gives up.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="legend">
+        <span><span class="swatch" style="background:var(--green)"></span> Crusoe's frontier (10 coconuts/hr or 10 fish/hr)</span>
+        <span><span class="swatch" style="background:var(--gold)"></span> Hawkins's frontier (30 coconuts/hr or 15 fish/hr)</span>
+    </div>
+    </div>
+
+    <div id="answerKeySection" style="display:none;">
+        <div class="byline">Check your worksheet answers for the two extra PPC questions</div>
+        <div class="toggle" id="keyToggle">
+            <button class="active key" data-key="guns">🎖️ Guns vs. Butter</button>
+            <button class="key" data-key="time">🕒 Studying vs. Sleeping</button>
+        </div>
+
+        <div class="stage">
+            <div class="chart-box">
+                <svg id="keyChart" width="560" height="330" viewBox="0 0 560 330"></svg>
+            </div>
+            <div class="panels" id="keyTableWrap"></div>
+        </div>
+
+        <div class="answers-box" id="keyAnswers"></div>
+    </div>
+</div>
+
+<script>
+(function () {
+    const NS = 'http://www.w3.org/2000/svg';
+    const svg = document.getElementById('chart');
+
+    // ── fixed axis scale, shared by both people ──
+    const AXIS_MAXC = 120;   // x axis: 0-120 coconuts
+    const AXIS_MAXF = 60;    // y axis: 0-60 fish
+    const GRID_STEP = 10;    // drag snaps to every 10 coconuts
+    const PAD_L = 54, PAD_B = 40, PAD_T = 26, PAD_R = 20;
+    const SVG_W = 560, SVG_H = 330;
+    const PLOT_W = SVG_W - PAD_L - PAD_R;
+    const PLOT_H = SVG_H - PAD_T - PAD_B;
+
+    const people = {
+        crusoe: {
+            maxC: 40, maxF: 40, color: '#14532d', name: 'Crusoe', last: null,
+            trade: { wc: 20, wf: 20, tc: 25, tf: 23, labelW: 'A', labelT: "A′" }
+        },
+        hawkins: {
+            maxC: 120, maxF: 60, color: '#c4952e', name: 'Hawkins', last: null,
+            trade: { wc: 90, wf: 15, tc: 95, tf: 17, labelW: 'B', labelT: "B′" }
+        }
+    };
+    let showTrade = false;
+
+    function toPx(c, f) {
+        return {
+            x: PAD_L + (c / AXIS_MAXC) * PLOT_W,
+            y: (SVG_H - PAD_B) - (f / AXIS_MAXF) * PLOT_H
+        };
+    }
+    function curveF(p, c) {
+        // straight-line frontier (constant opportunity cost) — easier for intro students
+        return p.maxF * (1 - c / p.maxC);
+    }
+    function pxToC(p, pxX) {
+        let c = ((pxX - PAD_L) / PLOT_W) * AXIS_MAXC;
+        c = Math.round(c / GRID_STEP) * GRID_STEP;
+        return Math.min(p.maxC, Math.max(0, c));
+    }
+    function el(tag, attrs) {
+        const e = document.createElementNS(NS, tag);
+        for (const k in attrs) e.setAttribute(k, attrs[k]);
+        return e;
+    }
+
+    // ── static chart chrome ──
+    function buildChrome() {
+        svg.innerHTML = '';
+
+        // faint grid lines every 10 units on both axes
+        for (let c = 0; c <= AXIS_MAXC; c += 10) {
+            const p1 = toPx(c, 0), p2 = toPx(c, AXIS_MAXF);
+            svg.appendChild(el('line', { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y, stroke: '#eee', 'stroke-width': 1 }));
+        }
+        for (let f = 0; f <= AXIS_MAXF; f += 10) {
+            const p1 = toPx(0, f), p2 = toPx(AXIS_MAXC, f);
+            svg.appendChild(el('line', { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y, stroke: '#eee', 'stroke-width': 1 }));
+        }
+
+        svg.appendChild(el('line', { x1: PAD_L, y1: SVG_H - PAD_B, x2: SVG_W - 6, y2: SVG_H - PAD_B, stroke: '#1a1a1a', 'stroke-width': 1.5 }));
+        svg.appendChild(el('line', { x1: PAD_L, y1: SVG_H - PAD_B, x2: PAD_L, y2: 6, stroke: '#1a1a1a', 'stroke-width': 1.5 }));
+
+        // tick marks every 10 coconuts / 10 fish
+        for (let c = 0; c <= AXIS_MAXC; c += 10) {
+            const p = toPx(c, 0);
+            svg.appendChild(el('line', { x1: p.x, y1: SVG_H - PAD_B, x2: p.x, y2: SVG_H - PAD_B + 5, stroke: '#888', 'stroke-width': 1 }));
+            const t = el('text', { x: p.x, y: SVG_H - PAD_B + 18, 'text-anchor': 'middle', 'font-size': 10, fill: '#666', 'font-family': 'Georgia, serif' });
+            t.textContent = c;
+            svg.appendChild(t);
+        }
+        for (let f = 0; f <= AXIS_MAXF; f += 10) {
+            const p = toPx(0, f);
+            svg.appendChild(el('line', { x1: PAD_L - 5, y1: p.y, x2: PAD_L, y2: p.y, stroke: '#888', 'stroke-width': 1 }));
+            const t = el('text', { x: PAD_L - 9, y: p.y + 3, 'text-anchor': 'end', 'font-size': 10, fill: '#666', 'font-family': 'Georgia, serif' });
+            t.textContent = f;
+            svg.appendChild(t);
+        }
+
+        const labelX = el('text', { x: PAD_L + PLOT_W / 2, y: SVG_H - 4, 'text-anchor': 'middle', 'font-size': 14, fill: '#333', 'font-family': 'Georgia, serif' });
+        labelX.textContent = '🥥 Coconuts per day';
+        svg.appendChild(labelX);
+
+        const labelY = el('text', { x: 16, y: PAD_T + PLOT_H / 2, 'text-anchor': 'middle', 'font-size': 14, fill: '#333', 'font-family': 'Georgia, serif', transform: `rotate(-90 16 ${PAD_T + PLOT_H / 2})` });
+        labelY.textContent = '🐟 Fish per day';
+        svg.appendChild(labelY);
+    }
+
+    function buildPerson(key) {
+        const p = people[key];
+        p.path = el('path', { fill: 'none', stroke: p.color, 'stroke-width': 3, 'stroke-linecap': 'round' });
+        svg.appendChild(p.path);
+
+        // endpoint icons: all-fish point (c=0) and all-coconuts point (f=0)
+        const fishEnd = toPx(0, p.maxF);
+        p.fishIcon = el('text', { x: fishEnd.x - 4, y: fishEnd.y - 6, 'font-size': 18, 'text-anchor': 'middle' });
+        p.fishIcon.textContent = '🐟';
+        svg.appendChild(p.fishIcon);
+
+        const coconutEnd = toPx(p.maxC, 0);
+        p.coconutIcon = el('text', { x: coconutEnd.x, y: coconutEnd.y + 20, 'font-size': 18, 'text-anchor': 'middle' });
+        p.coconutIcon.textContent = '🥥';
+        svg.appendChild(p.coconutIcon);
+
+        p.dot = el('circle', { r: 9, fill: p.color, stroke: '#fff', 'stroke-width': 2, cursor: 'grab' });
+        p.guideX = el('line', { stroke: p.color, 'stroke-width': 1, 'stroke-dasharray': '4,3', opacity: 0.7 });
+        p.guideY = el('line', { stroke: p.color, 'stroke-width': 1, 'stroke-dasharray': '4,3', opacity: 0.7 });
+        svg.appendChild(p.guideX);
+        svg.appendChild(p.guideY);
+        svg.appendChild(p.dot);
+
+        buildTradeOverlay(key);
+    }
+
+    function buildTradeOverlay(key) {
+        const p = people[key];
+        const t = p.trade;
+        const g = el('g', { style: 'display:none' });
+        p.tradeGroup = g;
+
+        const wPx = toPx(t.wc, t.wf);
+        const tPx = toPx(t.tc, t.tf);
+
+        // guide lines for "without trade" point (black)
+        g.appendChild(el('line', { x1: PAD_L, y1: wPx.y, x2: wPx.x, y2: wPx.y, stroke: '#333', 'stroke-width': 1, 'stroke-dasharray': '3,3' }));
+        g.appendChild(el('line', { x1: wPx.x, y1: wPx.y, x2: wPx.x, y2: SVG_H - PAD_B, stroke: '#333', 'stroke-width': 1, 'stroke-dasharray': '3,3' }));
+        // guide lines for "with trade" point (person color)
+        g.appendChild(el('line', { x1: PAD_L, y1: tPx.y, x2: tPx.x, y2: tPx.y, stroke: p.color, 'stroke-width': 1, 'stroke-dasharray': '3,3' }));
+        g.appendChild(el('line', { x1: tPx.x, y1: tPx.y, x2: tPx.x, y2: SVG_H - PAD_B, stroke: p.color, 'stroke-width': 1, 'stroke-dasharray': '3,3' }));
+
+        // connecting arrow from "without" to "with"
+        g.appendChild(el('line', { x1: wPx.x, y1: wPx.y, x2: tPx.x, y2: tPx.y, stroke: p.color, 'stroke-width': 1.5, opacity: 0.55 }));
+
+        // axis value labels for the trade numbers (only needed where they don't land on a 10-grid tick)
+        function axisLabel(value, isX) {
+            if (value % 10 === 0) return; // already shown by the normal tick label
+            if (isX) {
+                const px = toPx(value, 0);
+                const t2 = el('text', { x: px.x, y: SVG_H - PAD_B + 18, 'text-anchor': 'middle', 'font-size': 10, fill: p.color, 'font-family': 'Georgia, serif', 'font-weight': 'bold' });
+                t2.textContent = value;
+                g.appendChild(t2);
+            } else {
+                const px = toPx(0, value);
+                const t2 = el('text', { x: PAD_L - 9, y: px.y + 3, 'text-anchor': 'end', 'font-size': 10, fill: p.color, 'font-family': 'Georgia, serif', 'font-weight': 'bold' });
+                t2.textContent = value;
+                g.appendChild(t2);
+            }
+        }
+        axisLabel(t.tc, true);
+        axisLabel(t.tf, false);
+
+        // the two dots
+        g.appendChild(el('circle', { cx: wPx.x, cy: wPx.y, r: 6, fill: '#222' }));
+        g.appendChild(el('circle', { cx: tPx.x, cy: tPx.y, r: 6, fill: p.color, stroke: '#222', 'stroke-width': 1 }));
+
+        // labels
+        const lw = el('text', { x: wPx.x - 10, y: wPx.y - 8, 'font-size': 13, 'font-style': 'italic', fill: '#222', 'font-family': 'Georgia, serif' });
+        lw.textContent = t.labelW;
+        g.appendChild(lw);
+        const lt = el('text', { x: tPx.x + 8, y: tPx.y - 8, 'font-size': 13, 'font-style': 'italic', fill: p.color, 'font-family': 'Georgia, serif' });
+        lt.textContent = t.labelT;
+        g.appendChild(lt);
+
+        svg.appendChild(g);
+    }
+
+    function redrawPerson(key) {
+        const p = people[key];
+        let d = '';
+        const steps = 60;
+        for (let i = 0; i <= steps; i++) {
+            const c = (p.maxC * i) / steps;
+            const f = curveF(p, c);
+            const px = toPx(c, f);
+            d += (i === 0 ? 'M' : 'L') + px.x.toFixed(1) + ',' + px.y.toFixed(1) + ' ';
+        }
+        p.path.setAttribute('d', d);
+
+        const fishEnd = toPx(0, p.maxF);
+        p.fishIcon.setAttribute('x', fishEnd.x - 4);
+        p.fishIcon.setAttribute('y', fishEnd.y - 6);
+        const coconutEnd = toPx(p.maxC, 0);
+        p.coconutIcon.setAttribute('x', coconutEnd.x);
+        p.coconutIcon.setAttribute('y', coconutEnd.y + 20);
+    }
+
+    function iconRow(emoji, value, perIcon, cap) {
+        let n = Math.round(value / perIcon);
+        if (n <= 0) return '';
+        const capped = Math.min(n, cap);
+        let s = emoji.repeat(capped);
+        if (n > cap) s += ` +${n - cap}`;
+        return s;
+    }
+
+    function readoutIds(key) {
+        return key === 'crusoe'
+            ? { c: 'cC', f: 'cF', bc: 'basketC_c', bf: 'basketC_f', oc: 'ocCrusoe' }
+            : { c: 'hC', f: 'hF', bc: 'basketH_c', bf: 'basketH_f', oc: 'ocHawkins' };
+    }
+
+    function setPoint(key, c, updateText) {
+        const p = people[key];
+        const f = curveF(p, c);
+        const px = toPx(c, f);
+        p.dot.setAttribute('cx', px.x);
+        p.dot.setAttribute('cy', px.y);
+        const axisPt = toPx(0, 0);
+        p.guideX.setAttribute('x1', px.x); p.guideX.setAttribute('y1', px.y);
+        p.guideX.setAttribute('x2', px.x); p.guideX.setAttribute('y2', SVG_H - PAD_B);
+        p.guideY.setAttribute('x1', PAD_L); p.guideY.setAttribute('y1', px.y);
+        p.guideY.setAttribute('x2', px.x); p.guideY.setAttribute('y2', px.y);
+        if (updateText !== false) {
+            const ids = readoutIds(key);
+            document.getElementById(ids.c).textContent = c.toFixed(1);
+            document.getElementById(ids.f).textContent = f.toFixed(1);
+            document.getElementById(ids.bc).textContent = iconRow('🥥', c, 10, 12);
+            document.getElementById(ids.bf).textContent = iconRow('🐟', f, 5, 12);
+        }
+        return { c, f };
+    }
+
+    function describeMove(key, from, to) {
+        const ids = readoutIds(key);
+        const box = document.getElementById(ids.oc);
+        const name = people[key].name;
+        const dc = to.c - from.c;
+        const df = to.f - from.f;
+        if (Math.abs(dc) < 0.4 && Math.abs(df) < 0.4) {
+            box.innerHTML = 'Try dragging further along the curve to compare two points.';
+            return;
+        }
+        if (dc > 0 && df < 0) {
+            const cost = (-df / dc).toFixed(2);
+            box.innerHTML = `${name} gained <b>${dc.toFixed(1)} coconuts</b> but gave up <b>${(-df).toFixed(1)} fish</b>. Opportunity cost: <b>${cost} fish per coconut</b>.`;
+        } else if (dc < 0 && df > 0) {
+            const cost = (-dc / df).toFixed(2);
+            box.innerHTML = `${name} gained <b>${df.toFixed(1)} fish</b> but gave up <b>${(-dc).toFixed(1)} coconuts</b>. Opportunity cost: <b>${cost} coconuts per fish</b>.`;
+        }
+    }
+
+    let draggingKey = null;
+    function pointerX(evt) {
+        const rect = svg.getBoundingClientRect();
+        const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
+        return (clientX - rect.left) * (SVG_W / rect.width);
+    }
+    function attachDrag(key) {
+        const p = people[key];
+        function down(evt) { draggingKey = key; p.dot.setAttribute('cursor', 'grabbing'); evt.preventDefault(); }
+        p.dot.addEventListener('mousedown', down);
+        p.dot.addEventListener('touchstart', down, { passive: false });
+    }
+    function onMove(evt) {
+        if (!draggingKey) return;
+        const p = people[draggingKey];
+        const c = pxToC(p, pointerX(evt));
+        setPoint(draggingKey, c);
+        evt.preventDefault();
+    }
+    function onUp() {
+        if (!draggingKey) return;
+        const key = draggingKey;
+        const p = people[key];
+        p.dot.setAttribute('cursor', 'grab');
+        const c = parseFloat(document.getElementById(readoutIds(key).c).textContent);
+        const f = parseFloat(document.getElementById(readoutIds(key).f).textContent);
+        const current = { c, f };
+        if (p.last) describeMove(key, p.last, current);
+        p.last = current;
+        draggingKey = null;
+    }
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('touchmove', onMove, { passive: false });
+    window.addEventListener('mouseup', onUp);
+    window.addEventListener('touchend', onUp);
+
+    function setMode(mode) {
+        document.querySelectorAll('#modeToggle button').forEach(b => b.classList.remove('active'));
+        document.querySelector(`#modeToggle button[data-mode="${mode}"]`).classList.add('active');
+        const showC = mode === 'crusoe' || mode === 'both';
+        const showH = mode === 'hawkins' || mode === 'both';
+        people.crusoe.path.style.display = showC ? '' : 'none';
+        people.crusoe.dot.style.display = showC ? '' : 'none';
+        people.crusoe.guideX.style.display = showC ? '' : 'none';
+        people.crusoe.guideY.style.display = showC ? '' : 'none';
+        people.crusoe.fishIcon.style.display = showC ? '' : 'none';
+        people.crusoe.coconutIcon.style.display = showC ? '' : 'none';
+        people.hawkins.path.style.display = showH ? '' : 'none';
+        people.hawkins.dot.style.display = showH ? '' : 'none';
+        people.hawkins.guideX.style.display = showH ? '' : 'none';
+        people.hawkins.guideY.style.display = showH ? '' : 'none';
+        people.hawkins.fishIcon.style.display = showH ? '' : 'none';
+        people.hawkins.coconutIcon.style.display = showH ? '' : 'none';
+        people.crusoe.tradeGroup.style.display = showC && showTrade ? '' : 'none';
+        people.hawkins.tradeGroup.style.display = showH && showTrade ? '' : 'none';
+        document.getElementById('panelCrusoe').classList.toggle('show', showC);
+        document.getElementById('panelHawkins').classList.toggle('show', showH);
+    }
+
+    document.querySelectorAll('#modeToggle button').forEach(btn => {
+        btn.addEventListener('click', () => setMode(btn.dataset.mode));
+    });
+
+    document.getElementById('tradeToggle').addEventListener('click', function () {
+        showTrade = !showTrade;
+        this.classList.toggle('active', showTrade);
+        setMode(document.querySelector('#modeToggle button.active').dataset.mode);
+    });
+
+    // ── Page-level tabs: Crusoe & Hawkins vs. Worksheet Answer Key ──
+    document.querySelectorAll('#pageToggle button').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('#pageToggle button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const showStory = btn.dataset.page === 'story';
+            document.getElementById('storySection').style.display = showStory ? '' : 'none';
+            document.getElementById('answerKeySection').style.display = showStory ? 'none' : '';
+        });
+    });
+
+    // ── Worksheet Answer Key ──
+    const KEY_DATA = {
+        guns: {
+            title: 'Guns vs. Butter: Military and Domestic Spending',
+            xLabel: '💰 Domestic Programs ($B)', yLabel: '🎖️ Military Spending ($B)',
+            xName: 'Domestic Programs ($B)', yName: 'Military Spending ($B)',
+            xMax: 20, yMax: 40, xStep: 5, yStep: 10,
+            letters: ['A', 'B', 'C', 'D', 'E'],
+            xVals: [0, 5, 10, 15, 20],
+            yVals: [40, 36, 28, 16, 0],
+            fmtX: n => `$${n}B in domestic spending`,
+            fmtY: n => `$${n}B in military spending`,
+            fmtRate: (dy, dx) => `$${(dy / dx).toFixed(2)}B in military spending given up per $1B in domestic spending gained`,
+            color: '#8b2432'
+        },
+        time: {
+            title: 'A Day in Your Life: Studying and Sleeping',
+            xLabel: '📚 Hours Spent Studying', yLabel: '😴 Hours Spent Sleeping',
+            xName: 'Hours Spent Studying', yName: 'Hours Spent Sleeping',
+            xMax: 4, yMax: 10, xStep: 1, yStep: 2,
+            letters: ['A', 'B', 'C', 'D', 'E'],
+            xVals: [0, 1, 2, 3, 4],
+            yVals: [10, 9, 7, 4, 0],
+            fmtX: n => `${n} hour${n === 1 ? '' : 's'} of studying`,
+            fmtY: n => `${n} hour${n === 1 ? '' : 's'} of sleep`,
+            fmtRate: (dy, dx) => `${(dy / dx).toFixed(1)} hour${(dy / dx) === 1 ? '' : 's'} of sleep given up per hour of studying gained`,
+            color: '#14532d'
+        }
+    };
+
+    const keySvg = document.getElementById('keyChart');
+    const K_PAD_L = 54, K_PAD_B = 40, K_PAD_T = 26, K_PAD_R = 20;
+    const K_SVG_W = 560, K_SVG_H = 330;
+    const K_PLOT_W = K_SVG_W - K_PAD_L - K_PAD_R;
+    const K_PLOT_H = K_SVG_H - K_PAD_T - K_PAD_B;
+
+    function kToPx(d, x, y) {
+        return {
+            x: K_PAD_L + (x / d.xMax) * K_PLOT_W,
+            y: (K_SVG_H - K_PAD_B) - (y / d.yMax) * K_PLOT_H
+        };
+    }
+
+    function buildKeyChart(key) {
+        const d = KEY_DATA[key];
+        keySvg.innerHTML = '';
+
+        for (let x = 0; x <= d.xMax; x += d.xStep) {
+            const p1 = kToPx(d, x, 0), p2 = kToPx(d, x, d.yMax);
+            keySvg.appendChild(el('line', { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y, stroke: '#eee', 'stroke-width': 1 }));
+        }
+        for (let y = 0; y <= d.yMax; y += d.yStep) {
+            const p1 = kToPx(d, 0, y), p2 = kToPx(d, d.xMax, y);
+            keySvg.appendChild(el('line', { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y, stroke: '#eee', 'stroke-width': 1 }));
+        }
+
+        keySvg.appendChild(el('line', { x1: K_PAD_L, y1: K_SVG_H - K_PAD_B, x2: K_SVG_W - 6, y2: K_SVG_H - K_PAD_B, stroke: '#1a1a1a', 'stroke-width': 1.5 }));
+        keySvg.appendChild(el('line', { x1: K_PAD_L, y1: K_SVG_H - K_PAD_B, x2: K_PAD_L, y2: 6, stroke: '#1a1a1a', 'stroke-width': 1.5 }));
+
+        for (let x = 0; x <= d.xMax; x += d.xStep) {
+            const p = kToPx(d, x, 0);
+            keySvg.appendChild(el('line', { x1: p.x, y1: K_SVG_H - K_PAD_B, x2: p.x, y2: K_SVG_H - K_PAD_B + 5, stroke: '#888', 'stroke-width': 1 }));
+            const t = el('text', { x: p.x, y: K_SVG_H - K_PAD_B + 18, 'text-anchor': 'middle', 'font-size': 10, fill: '#666', 'font-family': 'Georgia, serif' });
+            t.textContent = x;
+            keySvg.appendChild(t);
+        }
+        for (let y = 0; y <= d.yMax; y += d.yStep) {
+            const p = kToPx(d, 0, y);
+            keySvg.appendChild(el('line', { x1: K_PAD_L - 5, y1: p.y, x2: K_PAD_L, y2: p.y, stroke: '#888', 'stroke-width': 1 }));
+            const t = el('text', { x: K_PAD_L - 9, y: p.y + 3, 'text-anchor': 'end', 'font-size': 10, fill: '#666', 'font-family': 'Georgia, serif' });
+            t.textContent = y;
+            keySvg.appendChild(t);
+        }
+
+        const lx = el('text', { x: K_PAD_L + K_PLOT_W / 2, y: K_SVG_H - 4, 'text-anchor': 'middle', 'font-size': 13, fill: '#333', 'font-family': 'Georgia, serif' });
+        lx.textContent = d.xLabel;
+        keySvg.appendChild(lx);
+        const ly = el('text', { x: 16, y: K_PAD_T + K_PLOT_H / 2, 'text-anchor': 'middle', 'font-size': 13, fill: '#333', 'font-family': 'Georgia, serif', transform: `rotate(-90 16 ${K_PAD_T + K_PLOT_H / 2})` });
+        ly.textContent = d.yLabel;
+        keySvg.appendChild(ly);
+
+        // the actual PPC: straight segments through the real worksheet data
+        let path = '';
+        d.xVals.forEach((x, i) => {
+            const p = kToPx(d, x, d.yVals[i]);
+            path += (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ',' + p.y.toFixed(1) + ' ';
+        });
+        keySvg.appendChild(el('path', { d: path, fill: 'none', stroke: d.color, 'stroke-width': 3, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+
+        d.xVals.forEach((x, i) => {
+            const p = kToPx(d, x, d.yVals[i]);
+            keySvg.appendChild(el('circle', { cx: p.x, cy: p.y, r: 6, fill: d.color, stroke: '#fff', 'stroke-width': 1.5 }));
+            const t = el('text', { x: p.x, y: p.y - 12, 'text-anchor': 'middle', 'font-size': 13, 'font-style': 'italic', fill: '#222', 'font-family': 'Georgia, serif' });
+            t.textContent = d.letters[i];
+            keySvg.appendChild(t);
+        });
+    }
+
+    function buildKeyTable(key) {
+        const d = KEY_DATA[key];
+        let html = '<table class="key-table"><tr><th>Types of Production</th>' +
+            d.letters.map(l => `<th>${l}</th>`).join('') + '</tr>';
+        html += '<tr><td>' + d.xName + '</td>' + d.xVals.map(v => `<td>${v}</td>`).join('') + '</tr>';
+        html += '<tr><td>' + d.yName + '</td>' + d.yVals.map(v => `<td>${v}</td>`).join('') + '</tr>';
+        html += '</table>';
+        document.getElementById('keyTableWrap').innerHTML = html;
+    }
+
+    function ocSentence(d, i1, i2) {
+        const l1 = d.letters[i1], l2 = d.letters[i2];
+        const dx = d.xVals[i2] - d.xVals[i1];
+        const dy = d.yVals[i2] - d.yVals[i1];
+        return `<b>${l1} → ${l2}:</b> gained ${d.fmtX(dx)}, gave up ${d.fmtY(Math.abs(dy))} — an opportunity cost of ${d.fmtRate(Math.abs(dy), dx)}.`;
+    }
+
+    function buildKeyAnswers(key) {
+        const d = KEY_DATA[key];
+        const lines = [
+            ocSentence(d, 0, 1),
+            ocSentence(d, 1, 2),
+            ocSentence(d, 3, 4)
+        ];
+        document.getElementById('keyAnswers').innerHTML =
+            '<div style="font-weight:bold;margin-bottom:0.5rem;">Opportunity cost answers</div>' +
+            lines.map(l => `<div>${l}</div>`).join('');
+    }
+
+    function showKey(key) {
+        document.querySelectorAll('#keyToggle button').forEach(b => b.classList.remove('active'));
+        document.querySelector(`#keyToggle button[data-key="${key}"]`).classList.add('active');
+        buildKeyChart(key);
+        buildKeyTable(key);
+        buildKeyAnswers(key);
+    }
+    document.querySelectorAll('#keyToggle button').forEach(btn => {
+        btn.addEventListener('click', () => showKey(btn.dataset.key));
+    });
+
+    function init() {
+        buildChrome();
+        buildPerson('crusoe');
+        buildPerson('hawkins');
+        redrawPerson('crusoe');
+        redrawPerson('hawkins');
+        attachDrag('crusoe');
+        attachDrag('hawkins');
+        people.crusoe.last = setPoint('crusoe', 20);
+        people.hawkins.last = setPoint('hawkins', 60);
+        setMode('both');
+        showKey('guns');
+    }
+    init();
+})();
+</script>
+
+</body>
+</html>
