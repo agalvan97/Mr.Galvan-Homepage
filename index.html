@@ -141,6 +141,29 @@
         perspective: 900px;
     }
     .link-item { text-align: center; text-decoration: none; position: relative; }
+    .textbook-link-wrap {
+        width: 100%;
+        text-align: center;
+        margin-top: -0.5rem;
+    }
+    .textbook-link {
+        display: inline-block;
+        font-family: Arial, Helvetica, sans-serif;
+        font-weight: bold;
+        font-size: 0.95rem;
+        color: var(--blue);
+        background: linear-gradient(180deg, #fff, #e9effa);
+        border: 2px solid var(--gold);
+        border-radius: 30px;
+        padding: 0.6rem 1.6rem;
+        text-decoration: none;
+        box-shadow: 0 3px 8px rgba(10,47,107,0.18);
+        transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .textbook-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 12px rgba(10,47,107,0.28);
+    }
     .icon-wrap {
         position: relative;
         width: 130px;
@@ -308,6 +331,10 @@
                 <span class="label">Economics</span>
                 <small>Click to enter</small>
             </a>
+        </div>
+
+        <div class="textbook-link-wrap">
+            <a class="textbook-link" href="https://student.teachtci.com/student/sign_in" target="_blank" rel="noopener">📚 Class Textbook</a>
         </div>
 
     </div>
